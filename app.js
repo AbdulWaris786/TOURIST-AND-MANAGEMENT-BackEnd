@@ -6,8 +6,13 @@ const adminRouter = require("./router/admin-Router")
 const Port = process.env.PORT
 const DBConnection =require('./config/DB')
 const cors =require('cors')
+const session = require('express-session')
 app.use(cors())
-
+app.use(session({
+    secret: 'your-secret-key', // Change this to a secret key for session encryption
+    resave: false,
+    saveUninitialized: false
+}))
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
