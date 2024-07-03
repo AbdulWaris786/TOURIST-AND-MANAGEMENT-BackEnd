@@ -8,8 +8,6 @@ const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
 module.exports={
     userSignupPost: async(req,res)=>{
         const {email,password,confirmpassword}=req.body
-        console.log(email);
-
         try {
             const saltedPass = await bcrypt.genSalt(10)
             const hashedPass = await bcrypt.hash(password,saltedPass)
@@ -31,7 +29,6 @@ module.exports={
             }else{
                 await userSignup.save()
                 const OtpEmail={email}
-                
                 otpVerification(email)
                 res.status(200).json({message:'Sucessfull User Signup',OtpEmail})
             }
@@ -42,15 +39,12 @@ module.exports={
     },
     otpPost:async(req,res)=>{
         const {data,email}=req.body 
-        console.log(req.body);
         let OtpArray =[] 
         OtpArray = data.otp1+data.otp2+data.otp3+data.otp4+data.otp5+data.otp6
-        console.log(OtpArray,email);
         const userEmail =email.email
-        console.log(userEmail,'kkkk');
         try {
             if(!userEmail){
-                console.log('email vennilla');
+                console.log('user email not Exist');
             }else{
                 console.log(OtpArray,typeof(mailOtp.otpCode));
                 const recivedOtp =parseInt(OtpArray)
@@ -74,13 +68,36 @@ module.exports={
     },
     resendOtp:async(req,res)=>{
         const {email}=req.body
-        console.log(req.body);
-        console.log('ki',email.email);
         const userEmail = email.email
         if(!userEmail){
             console.log('user not exist');
         }else{
             otpVerification(userEmail)
+        }
+    },
+    userLoginPost:async(req,res)=>{
+        const {email,password} = req.body
+        const user = await signupModel.findOne({email})
+        try {
+            if(!email){
+                console.log('user not exist');
+            }else{
+                const passwordMatch =await bcrypt.compare(password ,user.password)
+                if(passwordMatch){
+                    console.log(99,passwordMatch);
+                    console.log(user.verification);
+                    if(user.verification == 'true'){
+                        console.log('user login sucessFully');
+                        res.status(200).json({message:'login Sucessfully'})
+                    }else{
+                        console.log('user login failed');
+                        res.status(404).json({error:'login failed'})
+                    }
+                }
+
+            }
+        } catch (error) {
+            console.error(error);
         }
     }
 } 
