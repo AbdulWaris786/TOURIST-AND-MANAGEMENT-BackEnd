@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs')
 const signupModel = require('../models/signup-Schema')
 const otpVerification = require('../utility/otpVerification');
 const mailOtp =require('../middleware/otpVerify')
+const jwt = require('jsonwebtoken');
+const jwtSecret =process.env.JWT
 const emailPattern = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
 
@@ -87,17 +89,25 @@ module.exports={
                     console.log(99,passwordMatch);
                     console.log(user.verification);
                     if(user.verification == 'true'){
-                        console.log('user login sucessFully');
-                        res.status(200).json({message:'login Sucessfully'})
+                        const token =jwt.sign(
+                            {emailId : email},
+                            jwtSecret,
+                            {expiresIn:'1h'}
+                        )
+                        console.log('user login sucessFully',token);
+                        res.status(200).json({message:'login Sucessfully',token})
                     }else{
                         console.log('user login failed');
-                        res.status(404).json({error:'login failed'})
+                        res.status(404).json({error:'Email not verified'})
                     }
+                }else{
+                    res.status(401).json({ error: 'Invalid credentials' });
                 }
 
             }
         } catch (error) {
             console.error(error);
         }
-    }
+    },
+
 } 
