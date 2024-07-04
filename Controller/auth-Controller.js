@@ -48,16 +48,13 @@ module.exports={
             if(!userEmail){
                 console.log('user email not Exist');
             }else{
-                console.log(OtpArray,typeof(mailOtp.otpCode));
                 const recivedOtp =parseInt(OtpArray)
                 const getOtp =mailOtp.otpCode;
                 if(recivedOtp == getOtp){
-                    console.log('ready');
                     const user = await signupModel.findOneAndUpdate(
                         {email:userEmail},
                         {$set:{verification:'true'}}
                     )
-                    console.log(user);
                     res.status(200).json({message:'hellooo'})
                 }else{
                     console.log('ready alla');
@@ -86,18 +83,14 @@ module.exports={
             }else{
                 const passwordMatch =await bcrypt.compare(password ,user.password)
                 if(passwordMatch){
-                    console.log(99,passwordMatch);
-                    console.log(user.verification);
                     if(user.verification == 'true'){
                         const token =jwt.sign(
                             {emailId : email},
                             jwtSecret,
                             {expiresIn:'1h'}
                         )
-                        console.log('user login sucessFully',token);
                         res.status(200).json({message:'login Sucessfully',token})
                     }else{
-                        console.log('user login failed');
                         res.status(404).json({error:'Email not verified'})
                     }
                 }else{
